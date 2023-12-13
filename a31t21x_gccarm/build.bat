@@ -1,2 +1,3 @@
 mkdir output
 make
+pause

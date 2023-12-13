@@ -13,48 +13,48 @@
  * Reference: https://opensource.org/licenses/BSD-3-Clause
  ******************************************************************************/
 
-#include "a31t21x.h"
+// #include "a31t21x.h"
+#include <stdint.h>
+#define SCU_PER1 ((volatile uint32_t*) 0x40000028)
+#define SCU_PCER1 ((volatile uint32_t*) 0x40000030)
+#define PC_MOD	((volatile uint32_t*) 0x40001200)
 
 void SystemInit(void)
 {
 	/* Disable Global Interrupt */
-	__disable_irq();
+	// __disable_irq();
+//   __ASM volatile ("cpsid i" : : : "memory");
 
 	/* WDT Disable */
-	WDT->CR = (0x5A69<<16)
+  *((uint32_t*)0x40001A00) = (0x5A69<<16)
 		|(0x25<<10)
 		|(0x1A<<4);
 
 	/* GPIO Access Enable */
-	PORTEN->EN = 0x15;
-	PORTEN->EN = 0x51;
-
-	/* Flash Access Time Configure */
-	FMC->MR = 0x81;
-	FMC->MR = 0x28;
-	FMC->CFG = (0x7858 << 16) | (3 << 8);		// Flash Access in 4 cycles (3-wait)
-	FMC->MR = 0;
+	// PORTEN->EN = 0x15;
+	// PORTEN->EN = 0x51;
+	*((uint32_t*)0x40001FF0) = 0x15;
+	*((uint32_t*)0x40001FF0) = 0x51;
+	
 }
 
 int main(void)
 {
 	SystemInit();
 	/* Peripheral Enable(0:Disable, 1:Enable) */
-	SCU->PER1 = SCU->PER1
-			| (1<<10)	// GPIOC
+	*(SCU_PER1) = (1<<10)	// GPIOC
 			;
 	/* Peripheral Clock Enable(0:Disable, 1:Enable) */
-	SCU->PCER1 = SCU->PCER1
-			| (1<<10)	// GPIOC
-			;
-	PC->MOD = (1 << 0) | (1 << 2);
+	*(SCU_PCER1) = (1<<10)	// GPIOC
+	;
+	*(PC_MOD) = (1 << 0) | (1 << 2);		
 
 	while(1) 
 		{
-			PC->BCR = (1 << 0) | (1 << 1);
-			for(int i=0; i<5000; i++); 
-			PC->BSR = (1 << 0) | (1 << 1);
-			for(int i=0; i<5000; i++); 
+			*((uint32_t*)0x40001220) = (1 << 0) | (1 << 1);
+			for(int i=0; i<20000; i++); 
+			*((uint32_t*)0x4000121C) = (1 << 0) | (1 << 1);
+			for(int i=0; i<20000; i++); 
 		}
 	return 0;
 }

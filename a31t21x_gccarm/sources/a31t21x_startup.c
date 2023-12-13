@@ -1,6 +1,6 @@
 
 #include <stdint.h>
-#include "a31t21x.h"
+
 #define SRAM_START  0x20000000U
 #define SRAM_SIZE   (8U * 1024U) //8KB
 #define SRAM_END    ((SRAM_START) + (SRAM_SIZE))
